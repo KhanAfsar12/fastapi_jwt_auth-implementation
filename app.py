@@ -1,13 +1,18 @@
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from werkzeug.security import generate_password_hash, check_password_hash
 from fastapi_jwt_auth import AuthJWT
 from mongoengine import connect, Document, EmailField, StringField, ReferenceField, BooleanField, NotUniqueError
 from pydantic import BaseModel, EmailStr
 import uvicorn
+import os
 
 connect(db="fastapi_jwt_auth", host="localhost", port=27017)
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+template_path = os.path.join(BASE_DIR, "templates")
+templates = Jinja2Templates(directory=template_path)
 
 class User(Document):
     email = EmailField(required=True, unique=True)
@@ -47,6 +52,16 @@ app = FastAPI()
 @AuthJWT.load_config
 def get_config():
     return Settings()
+
+@app.get('/', response_class=HTMLResponse)
+async def home(request: Request):
+    total_users = User.objects.count()
+
+    context = {
+        "request": request,
+        'total_users': total_users
+    }
+    return templates.TemplateResponse("home.html", context)
 
 @app.post('/register', status_code=status.HTTP_201_CREATED)
 def register(user: RegisterSchema):
