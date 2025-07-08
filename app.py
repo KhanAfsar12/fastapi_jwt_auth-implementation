@@ -2,6 +2,7 @@ from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
 from werkzeug.security import generate_password_hash, check_password_hash
 from fastapi_jwt_auth import AuthJWT
 from mongoengine import connect, Document, EmailField, StringField, ReferenceField, BooleanField, NotUniqueError
@@ -9,21 +10,37 @@ from pydantic import BaseModel, EmailStr
 import uvicorn
 import os
 
+app = FastAPI()
+
+# DB Connection
 connect(db="fastapi_jwt_auth", host="localhost", port=27017)
+
+# Template Configurations
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 template_path = os.path.join(BASE_DIR, "templates")
 templates = Jinja2Templates(directory=template_path)
 
+# Middleware
+app.add_middleware(
+    CORSMiddleware, 
+    allow_origins=['*'],
+    allow_credentials = True,
+    allow_methods = ['*'],
+    allow_headers = ['*']
+    )
+
+# Models
 class User(Document):
     email = EmailField(required=True, unique=True)
     password  = StringField(required=True)
     username = StringField(max_length=50)
     is_active = BooleanField(default=True)
-
+    meta = {
+        'indexes': ['email']
+    }
     def __str__(self):
         return f"{self.username} Account Updated"
     
-
 class Profile(Document):
     user = ReferenceField(User, required=True, unique=True)
     bio = StringField(default="Hello! I'm new here..")
@@ -47,11 +64,11 @@ class Settings(BaseModel):
     authjwt_secret_key:str = "AfsarKhan12"
 
 
-app = FastAPI()
 
 @AuthJWT.load_config
 def get_config():
     return Settings()
+
 
 @app.get('/', response_class=HTMLResponse)
 async def home(request: Request):
