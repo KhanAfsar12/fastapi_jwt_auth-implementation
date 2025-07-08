@@ -159,7 +159,7 @@
             font-weight: 500;
         }
 
-        .form-group input {
+        .form-group input, .form-group select {
             width: 100%;
             padding: 0.75rem;
             border: 1px solid #ddd;
@@ -167,7 +167,7 @@
             font-size: 1rem;
         }
 
-        .form-group input:focus {
+        .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: #3498db;
             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
@@ -225,8 +225,8 @@
 
         .card-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2rem;
             margin-bottom: 2rem;
         }
 
@@ -236,11 +236,16 @@
             padding: 1.5rem;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
         }
 
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card > a {
+            text-decoration: none;
         }
 
         .card-title {
@@ -295,6 +300,47 @@
 
         .profile-info p {
             color: #7f8c8d;
+        }
+
+        .passenger-card {
+            background: #f9f9f9;
+            border-radius: 4px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #3498db;
+        }
+        
+        .passenger-card h5 {
+            margin: 0 0 0.5rem 0;
+            color: #2c3e50;
+        }
+        
+        .passenger-card p {
+            margin: 0.25rem 0;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .passenger-actions {
+            margin-top: 0.5rem;
+        }
+        
+        .passenger-actions button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .passenger-form-container {
+            display: block;
+        }
+        
+        .passenger-form-container.hidden {
+            display: none;
         }
 
         /* Footer Styles */
@@ -380,20 +426,26 @@
 
             <div class="card-container">
                 <div class="card">
-                    <h3 class="card-title">Total Users</h3>
+                    <h3 class="card-title">Users</h3>
                     <div class="card-value" id="totalUsers">{{ total_users }}</div>
                 </div>
                 <div class="card">
-                    <h3 class="card-title">Revenue</h3>
-                    <div class="card-value" id="revenue">$24,532</div>
+                    <a href="{{ url_for('flights') }}">
+                    <h3 class="card-title">Flight</h3>
+                    <div class="card-value" id="totalFlight">{{ total_flights }}</div>
+                    </a>
                 </div>
                 <div class="card">
-                    <h3 class="card-title">Conversion Rate</h3>
-                    <div class="card-value" id="conversionRate">3.2%</div>
+                    <h3 class="card-title">Airport</h3>
+                    <div class="card-value" id="totalAirport">{{ total_airports }}</div>
                 </div>
                 <div class="card">
-                    <h3 class="card-title">Active Sessions</h3>
-                    <div class="card-value" id="activeSessions">428</div>
+                    <h3 class="card-title">Airline</h3>
+                    <div class="card-value" id="totalAirline">{{ total_airlines }}</div>
+                </div>
+                <div class="card">
+                    <h3 class="card-title">Aircraft</h3>
+                    <div class="card-value" id="totalAircraft">{{ total_aircraft }}</div>
                 </div>
             </div>
         </section>
@@ -411,10 +463,49 @@
                         <p><strong>Username:</strong> <span id="profileUsername">Loading...</span></p>
                         <p><strong>Status:</strong> <span id="profileStatus">Loading...</span></p>
                     </div>
+                    
+                    <!-- Passenger Form (hidden by default if passengers exist) -->
+                    <div class="profile-info passenger-form-container" id="passengerFormContainer">
+                        <h4>Add passenger details</h4>
+                        <form id="passengerForm">
+                            <div class="form-group">
+                                <label for="passengerFirstName">First Name</label>
+                                <input type="text" id="passengerFirstName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="passengerLastName">Last Name</label>
+                                <input type="text" id="passengerLastName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="passengerPassport">Passport Number</label>
+                                <input type="text" id="passengerPassport">
+                            </div>
+                            <div class="form-group">
+                                <label for="passengerNationality">Nationality</label>
+                                <input type="text" id="passengerNationality">
+                            </div>
+                            <div class="form-group">
+                                <label for="passengerDOB">Date of Birth</label>
+                                <input type="date" id="passengerDOB">
+                            </div>
+                            <div class="form-group">
+                                <label for="passengerType">Passenger Type</label>
+                                <select id="passengerType">
+                                    <option value="ADULT">Adult</option>
+                                    <option value="CHILD">Child</option>
+                                    <option value="INFANT">Infant</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="submit-btn">Save Data</button>
+                        </form>
+                    </div>
+
+                    <!-- Passenger List -->
                     <div class="profile-info">
-                        <h4>Profile Details</h4>
-                        <p><strong>Bio:</strong> <span id="profileBio">Loading...</span></p>
-                        <p><strong>Link:</strong> <span id="profileLink">Loading...</span></p>
+                        <h4>Your Passengers</h4>
+                        <div id="passengersList" class="passengersList">
+                            <!-- Passengers will be loaded here -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -779,18 +870,22 @@
                     throw new Error('No authentication token found');
                 }
 
-                const response = await fetch(`${API_BASE_URL}/profile`, {
+                // Fetch profile data
+                const profileResponse = await fetch(`${API_BASE_URL}/profile`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
 
-                if (!response.ok) {
+                if (!profileResponse.ok) {
                     throw new Error('Failed to fetch profile');
                 }
 
-                const profileData = await response.json();
+                const profileData = await profileResponse.json();
                 updateProfileUI(profileData.Profile);
+                
+                // Load passengers after profile is loaded
+                await loadPassengers();
             } catch (error) {
                 console.error('Profile fetch error:', error);
                 alert('Failed to load profile. Please try again.');
@@ -802,8 +897,6 @@
             document.getElementById('profileEmail').textContent = profileData.email;
             document.getElementById('profileUsername').textContent = profileData.username;
             document.getElementById('profileStatus').textContent = 'Active';
-            document.getElementById('profileBio').textContent = profileData.bio;
-            document.getElementById('profileLink').textContent = profileData.link;
         }
 
         // Update UI based on auth state
@@ -836,6 +929,175 @@
                 
                 // Show home page
                 showPage('home');
+            }
+        }
+
+        // Load passengers from API
+        async function loadPassengers() {
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`${API_BASE_URL}/get_passengers`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load passengers');
+                }
+
+                const passengers = await response.json();
+                displayPassengers(passengers);
+                
+                // Show/hide form based on whether passengers exist
+                const formContainer = document.getElementById('passengerFormContainer');
+                if (passengers && passengers.length > 0) {
+                    formContainer.classList.add('hidden');
+                } else {
+                    formContainer.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error loading passengers:', error);
+                document.getElementById('passengersList').innerHTML = 
+                    '<p>Error loading passengers. Please try again.</p>';
+            }
+        }
+
+        // Display passengers in the UI
+        function displayPassengers(passengers) {
+            const container = document.getElementById('passengersList');
+            if (!container) return;
+
+            if (!passengers || passengers.length === 0) {
+                container.innerHTML = '<p>No passengers saved yet.</p>';
+                return;
+            }
+
+            container.innerHTML = passengers.map(passenger => {
+                let dobDisplay = '';
+                if (passenger.date_of_birth) {
+                    const dobDate = new Date(passenger.date_of_birth);
+                    dobDisplay = `<p><strong>DOB:</strong> ${dobDate.toLocaleDateString()}</p>`;
+                }
+
+                return `
+                <div class="passenger-card">
+                    <h5>${passenger.first_name} ${passenger.last_name}</h5>
+                    <p><strong>Type:</strong> ${passenger.passenger_type}</p>
+                    ${passenger.passport_number ? `<p><strong>Passport:</strong> ${passenger.passport_number}</p>` : ''}
+                    ${passenger.nationality ? `<p><strong>Nationality:</strong> ${passenger.nationality}</p>` : ''}
+                    ${dobDisplay}
+                    <div class="passenger-actions">
+                        <button onclick="deletePassenger('${passenger.id}')">Delete</button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // Handle passenger form submission
+        document.getElementById('passengerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    try {
+        // Get form values
+        const firstName = document.getElementById('passengerFirstName').value.trim();
+        const lastName = document.getElementById('passengerLastName').value.trim();
+        const passport = document.getElementById('passengerPassport').value.trim();
+        const nationality = document.getElementById('passengerNationality').value.trim();
+        const dobInput = document.getElementById('passengerDOB').value;
+        const passengerType = document.getElementById('passengerType').value;
+
+        // Basic validation
+        if (!firstName || !lastName) {
+            alert('First name and last name are required');
+            return;
+        }
+
+        // Prepare date - format as YYYY-MM-DD if exists
+        let formattedDOB = null;
+        if (dobInput) {
+            const dateObj = new Date(dobInput);
+            formattedDOB = dateObj.toISOString().split('T')[0]; // Get just the date part
+        }
+
+        // Prepare data
+        const passengerData = {
+            first_name: firstName,
+            last_name: lastName,
+            passport_number: passport || null,
+            nationality: nationality || null,
+            date_of_birth: formattedDOB,  // Now properly formatted
+            passenger_type: passengerType
+        };
+
+        console.log('Submitting:', passengerData);
+
+        // Get token
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            alert('Session expired. Please login again.');
+            return;
+        }
+
+        // Send request
+        const response = await fetch(`${API_BASE_URL}/add_passenger`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(passengerData)
+        });
+
+        // Handle response
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Backend error:', errorData);
+            
+            // Improved error message display
+            const errorMsg = errorData.detail?.[0]?.msg || JSON.stringify(errorData);
+            throw new Error(errorMsg);
+        }
+
+        // Success
+        this.reset();
+        await loadPassengers();
+        alert('Passenger saved successfully!');
+    } catch (error) {
+        console.error('Error:', error);
+        alert(`Error: ${error.message}`);
+    }
+});
+
+        // Delete passenger
+        async function deletePassenger(passengerId) {
+            if (!confirm('Are you sure you want to delete this passenger?')) return;
+            
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`${API_BASE_URL}/delete_passenger/${passengerId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to delete passenger");
+                }
+                
+                await loadPassengers(); // Reload passengers after deletion
+                
+                // Show the form again if no passengers left
+                const formContainer = document.getElementById('passengerFormContainer');
+                const passengersList = document.getElementById('passengersList');
+                if (passengersList.innerHTML.includes('No passengers')) {
+                    formContainer.classList.remove('hidden');
+                }
+            } catch(error) {
+                console.error("Error deleting Passenger:", error);
+                alert('Error deleting passenger: ' + error.message);
             }
         }
 
