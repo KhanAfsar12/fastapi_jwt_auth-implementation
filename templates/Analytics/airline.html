@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Airlines Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 90vh;
+            width: 100%;
+            margin-top: 20px;
+        }
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            background: #f4f6f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌐 Global Airlines Map</h1>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([20, 0], 2);  // World view
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        const airlines = {{ airlines | tojson }};
+
+        airlines.forEach(airline => {
+            if (airline.lat && airline.lng) {
+                const popupContent = `
+                    <strong>${airline.name}</strong><br>
+                    Code: ${airline.code}<br>
+                    <img src="${airline.logo_url}" alt="${airline.name}" width="100"/>
+                `;
+                L.marker([airline.lat, airline.lng])
+                    .addTo(map)
+                    .bindPopup(popupContent);
+            }
+        });
+    </script>
+</body>
+</html>

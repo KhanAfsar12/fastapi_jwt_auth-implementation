@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Aircraft List - AG Grid</title>
+
+  <!-- ✅ AG Grid CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@30.2.0/styles/ag-grid.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@30.2.0/styles/ag-theme-alpine.css" />
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f6f9;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    .ag-theme-alpine {
+      height: 80vh;
+      width: 90%;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>✈️ Aircraft Directory</h1>
+
+  <div id="aircraftGrid" class="ag-theme-alpine"></div>
+
+  <!-- ✅ Load AG Grid with Global agGrid object -->
+  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@30.2.0/dist/ag-grid-community.min.js"></script>
+
+  <script>
+    const gridOptions = {
+      columnDefs: [
+        { headerName: "Model", field: "model", sortable: true, filter: true },
+        { headerName: "Code", field: "code", sortable: true, filter: true },
+        { headerName: "Manufacturer", field: "manufacturer", sortable: true, filter: true },
+        { headerName: "Capacity", field: "capacity", sortable: true, filter: true }
+      ],
+      defaultColDef: {
+        flex: 1,
+        minWidth: 150,
+        resizable: true
+      },
+      rowData: {{ aircrafts | tojson | safe }},
+      pagination: true,
+      paginationPageSize: 10,
+      animateRows: true
+    };
+
+    // ✅ CORRECT way to create AG Grid
+    document.addEventListener('DOMContentLoaded', () => {
+      const eGridDiv = document.querySelector('#aircraftGrid');
+      new agGrid.Grid(eGridDiv, gridOptions);  // ✅ Use agGrid.Grid here
+    });
+  </script>
+</body>
+</html>

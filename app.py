@@ -8,7 +8,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from werkzeug.security import generate_password_hash, check_password_hash
 from fastapi_jwt_auth import AuthJWT
-from mongoengine import connect, Document, EmailField, StringField, ReferenceField, BooleanField, NotUniqueError, DateTimeField, IntField, DecimalField, EmbeddedDocument, EmbeddedDocumentField, ListField
+from mongoengine import connect, Document, EmailField, StringField, ReferenceField, BooleanField, NotUniqueError, DateTimeField, IntField, DecimalField, EmbeddedDocument, EmbeddedDocumentField, ListField, FloatField
 from pydantic import BaseModel, EmailStr, Field, validator
 import uvicorn
 import os
@@ -74,6 +74,8 @@ class Airport(Document):
     city = StringField(required=True)
     country = StringField(required=True)
     timezone = StringField()
+    latitude = FloatField()
+    longitude = FloatField()
     meta = {
         'collection': 'airports'
     }
@@ -82,6 +84,8 @@ class Airline(Document):
     code = StringField(required=True, unique=True, max_length=2)  # IATA code
     name = StringField(required=True)
     logo_url = StringField()
+    latitude = FloatField()
+    longitude = FloatField()
     meta = {
         'collection': 'airlines'
     }
@@ -406,6 +410,64 @@ def flight_detail(request: Request, flight_id: str):
     }
     return templates.TemplateResponse('Analytics/flight_detail.html', context)
 
+
+@app.get('/airport', response_class=HTMLResponse)
+def airports(request: Request):
+    airports = Airport.objects.all()
+    results = []
+    for airport in airports:
+        results.append({
+            "code": airport.code,
+            "name": airport.name,
+            "city": airport.city,
+            "country": airport.country,
+            "timezone": airport.timezone,
+            "lat": airport.latitude,
+            "lng": airport.longitude
+        })
+    
+    context = {
+        'request': request,
+        "airports": results
+    }
+    return templates.TemplateResponse('Analytics/airport.html', context)
+
+
+@app.get('/airlines')
+def airlines(request: Request):
+    airlines = Airline.objects.all()
+    results = []
+    for airline in airlines:
+        results.append({
+            "code": airline.code,
+            "name": airline.name,
+            "logo_url": airline.logo_url,
+            "lat": airline.latitude,
+            'lng': airline.longitude
+        })
+    context = {
+        "request": request,
+        "airlines": results
+    }
+    return templates.TemplateResponse("Analytics/airline.html", context)
+
+
+@app.get('/aircraft')
+def  aircrafts(request: Request):
+    aircrafts = Aircraft.objects.all()
+    results = []
+    for aircraft in aircrafts:
+        results.append({
+            "model": aircraft.model,
+            "code": aircraft.code,
+            "manufacturer": aircraft.manufacturer,
+            "capacity": aircraft.capacity
+        })
+    context = {
+        'request': request,
+        "aircrafts": results
+    }
+    return templates.TemplateResponse('Analytics/aircraft.html', context)
 
 @app.post('/add_passenger')
 def add_passenger(passenger: PassengerInfo, Authorize: AuthJWT = Depends()):
