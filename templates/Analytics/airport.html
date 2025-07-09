@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Airport Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+            margin: 20px 0;
+            color: #333;
+        }
+        #map {
+            height: 90vh;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>✈️ Airport Map</h1>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([20, 0], 2); // Center of the world
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        const airports = {{ airports | tojson | safe }};
+
+        airports.forEach(airport => {
+            if (airport.lat && airport.lng) {
+                const popup = `
+                    <strong>${airport.name} (${airport.code})</strong><br>
+                    ${airport.city}, ${airport.country}<br>
+                    Timezone: ${airport.timezone}
+                `;
+                L.marker([airport.lat, airport.lng])
+                 .addTo(map)
+                 .bindPopup(popup);
+            }
+        });
+    </script>
+</body>
+</html>

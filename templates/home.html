@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JWT Auth Dashboard</title>
+    <title>Dashboard</title>
     <style>
         * {
             margin: 0;
@@ -436,16 +436,22 @@
                     </a>
                 </div>
                 <div class="card">
+                    <a href="{{ url_for('airports') }}">
                     <h3 class="card-title">Airport</h3>
                     <div class="card-value" id="totalAirport">{{ total_airports }}</div>
+                    </a>
                 </div>
                 <div class="card">
+                    <a href="{{ url_for('airlines') }}">
                     <h3 class="card-title">Airline</h3>
                     <div class="card-value" id="totalAirline">{{ total_airlines }}</div>
+                    </a>
                 </div>
                 <div class="card">
+                    <a href="{{ url_for('aircrafts') }}">
                     <h3 class="card-title">Aircraft</h3>
                     <div class="card-value" id="totalAircraft">{{ total_aircraft }}</div>
+                    </a>
                 </div>
             </div>
         </section>
